@@ -44,6 +44,11 @@ Arguments: ([] [subtask & args])
 Add the following map to your project.clj:
 
 ```
+;; outside defproject
+(def sdk-version "1.9.59")
+
+;; inside defproject
+
 :jaq {:sdk-path "sdk"
         :sdk-version ~sdk-version
         :war-app-path "war"
