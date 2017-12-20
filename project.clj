@@ -12,7 +12,7 @@
                  [org.clojure/tools.logging "0.4.0"]
 
                  [com.alpeware/jaq-services "0.1.0-SNAPSHOT"]
-
+                 [ring/ring "1.6.3"]
                  [lein-ring "0.12.2"]
                  [net.lingala.zip4j/zip4j "1.3.2"]]
 

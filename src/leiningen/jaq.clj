@@ -168,9 +168,12 @@
   "Create project."
   [project & args]
   (let [project-id (get-in project [:jaq :project-id])
-        project-name (get-in project [:jaq :project-name])
-        p (resource/create project-id project-name)]
-    (pprint p)))
+        project-name (get-in project [:jaq :project-name])]
+    (loop [op (resource/create project-id project-name)]
+      (pprint op)
+      (when-not (:done op)
+        (sleep)
+        (recur (resource/operation (:name op)))))))
 
 (defn create-application
   "Create application."
