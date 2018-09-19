@@ -14,7 +14,7 @@ Available on Clojars:
 
 Alpha quality with some API changes expected.
 
-## Tasks 
+## Tasks
 
 ```
 Manage a Google Appengine App.
@@ -59,6 +59,7 @@ Add the following map to your project.clj:
         :project-id "project-id"
         :project-name "project name"
         :location-id "europe-west3"
+        :service :default
         :bucket "staging.project-id.appspot.com"
         :prefix "apps/latest"
         :version "v1"}

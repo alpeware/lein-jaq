@@ -4,6 +4,8 @@
    [clojure.pprint :refer [pprint]]
    [clojure.java.io :as io]
    [cemerick.pomegranate.aether :as aether]
+   [leiningen.cljsbuild :as cljsbuild]
+   [leiningen.cljsbuild.config :as config]
    [leiningen.core.eval :refer [eval-in-project]]
    [leiningen.ring.uberwar :refer [uberwar]]
    [leiningen.ring.war :refer [war-file-path]]
@@ -103,6 +105,9 @@
   [project & args]
   (let [war-path (war-file-path project (default-uberwar-name project))
         target-path (get-exploded-war-path project)]
+    (try
+      (delete-recursively target-path)
+      (catch Exception _ nil))
     (println "Exploding" war-path "to" target-path)
     (unzip-file war-path target-path)
     (copy-file "war-resources/appengine-web.xml" (str target-path  "/WEB-INF/appengine-web.xml"))
@@ -124,12 +129,13 @@
   "Deploys to App Engine."
   [project & args]
   (let [project-id (get-in project [:jaq :project-id])
+        service (get-in project [:jaq :service])
         bucket (get-in project [:jaq :bucket])
         prefix (get-in project [:jaq :prefix])
         version (get-in project [:jaq :version])
         servlet (get-in project [:jaq :servlet] "servlet")]
     (println "Deploying app...")
-    (loop [op (admin/deploy-app project-id bucket prefix version servlet)]
+    (loop [op (admin/deploy-app project-id service bucket prefix version servlet)]
       (pprint op)
       (when-not (:done op)
         (sleep)
@@ -197,12 +203,30 @@
         (sleep)
         (recur (admin/operation (:name op)))))))
 
+(defn cljs-once
+  "Build CLJS once."
+  [project & args]
+  (let [options (config/extract-options project)]
+    (#'leiningen.cljsbuild/once project options args)))
+
+(defn cljs-auto
+  "Build CLJS auto."
+  [project & args]
+  (let [options (config/extract-options project)]
+    (#'leiningen.cljsbuild/auto project options args)))
+
+(defn cljs
+  "CLJS Build."
+  [project subtask & args]
+  (cljsbuild/cljsbuild project subtask args))
+
 (defn jaq
   "Manage a Google Appengine App."
   {:subtasks [#'unpack #'explode #'dev-server #'uberwar
               #'auth-token #'deploy #'upload #'create-project
               #'create-application #'list-projects #'list-locations
-              #'list-application #'migrate]}
+              #'list-application #'migrate #'cljs-once #'cljs-auto
+              #'cljs]}
   ([project]
    (help-for project "jaq"))
   ([project subtask & args]
@@ -219,4 +243,7 @@
      "list-projects" (apply list-projects project args)
      "list-locations" (apply list-locations project args)
      "list-application" (apply list-application project args)
-     "uberwar" (apply uberwar project args))))
+     "uberwar" (apply uberwar project args)
+     "cljs-once" (apply cljs-once project args)
+     "cljs-auto" (apply cljs-auto project args)
+     "cljs" (apply cljs project args))))
