@@ -42,6 +42,6 @@
         :project-name "project name"
         :location-id "europe-west3"
         :service :default
-        :bucket "staging.project-id.appspot.com"
-        :prefix "apps/latest"
+        :code-bucket "staging.project-id.appspot.com"
+        :code-prefix "apps/latest"
         :version "v1"})

@@ -130,12 +130,12 @@
   [project & args]
   (let [project-id (get-in project [:jaq :project-id])
         service (get-in project [:jaq :service])
-        bucket (get-in project [:jaq :bucket])
-        prefix (get-in project [:jaq :prefix])
+        bucket (get-in project [:jaq :code-bucket])
+        prefix (get-in project [:jaq :code-prefix])
         version (get-in project [:jaq :version])
         servlet (get-in project [:jaq :servlet] "servlet")]
     (println "Deploying app...")
-    (loop [op (admin/deploy-app project-id service bucket prefix version servlet)]
+    (loop [op (admin/deploy-app (:jaq project))]
       (pprint op)
       (when-not (:done op)
         (sleep)
@@ -144,8 +144,8 @@
 (defn upload
   "Upload app to storage bucket."
   [project & args]
-  (let [bucket (get-in project [:jaq :bucket])
-        prefix (get-in project [:jaq :prefix])
+  (let [bucket (get-in project [:jaq :code-bucket])
+        prefix (get-in project [:jaq :code-prefix])
         src-dir (get-exploded-war-path project)]
     (println "Uploading app [this may take a while]...")
     (storage/copy-local src-dir bucket prefix)))
@@ -196,8 +196,9 @@
   "Migrate traffic to application version."
   [project & args]
   (let [project-id (get-in project [:jaq :project-id])
+        service (get-in project [:jaq :service])
         version (get-in project [:jaq :version])]
-    (loop [op (admin/migrate project-id version)]
+    (loop [op (admin/migrate project-id service version)]
       (pprint op)
       (when-not (:done op)
         (sleep)
